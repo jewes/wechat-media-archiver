@@ -1,4 +1,4 @@
 wechatpy
 ics
-itchat-uos==1.5.0.dev0
+#itchat-uos==1.5.0.dev0
 httpx
