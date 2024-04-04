@@ -28,11 +28,13 @@ if os.path.isfile(download_dir) or os.path.isfile(log_dir):
     sys.exit(1)
 
 # set logging level
+enabled_debug = config.get("default", "debug", fallback="1")
+log_level = logging.DEBUG if enabled_debug == "1" else logging.INFO
 logging.basicConfig(filename=f"{log_dir}/assistant.log",
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+                    level=log_level)
 
 
 @itchat.msg_register([TEXT, PICTURE, VIDEO], isGroupChat=True)
