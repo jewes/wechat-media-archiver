@@ -28,7 +28,7 @@ if os.path.isfile(download_dir) or os.path.isfile(log_dir):
     sys.exit(1)
 
 # set logging level
-enabled_debug = config.get("default", "debug", fallback="1")
+enabled_debug = config.get("default", "debug", fallback="0")
 log_level = logging.DEBUG if enabled_debug == "1" else logging.INFO
 logging.basicConfig(filename=f"{log_dir}/assistant.log",
                     filemode='a',
