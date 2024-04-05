@@ -12,7 +12,7 @@ class DictToObject:
         self.__dict__.update(entries)
 
 
-def format_unix_time_with_timezone(unix_time, timezone='Asia/Shanghai'):
+def format_unix_time_with_timezone(unix_time):
     from datetime import datetime, timezone
 
     utc_time = datetime.fromtimestamp(unix_time, timezone.utc)
