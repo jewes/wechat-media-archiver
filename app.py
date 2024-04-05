@@ -4,6 +4,7 @@ import os
 import sys
 import time
 
+import assistant
 import itchat
 from itchat.content import *
 
@@ -36,10 +37,12 @@ logging.basicConfig(filename=f"{log_dir}/assistant.log",
                     datefmt='%H:%M:%S',
                     level=log_level)
 
+start_time = time.time()
+assistant_mgr = assistant.AssistantManager(download_dir)
 
 @itchat.msg_register([TEXT, PICTURE, VIDEO], isGroupChat=True)
 def handle_group_chat_message(msg: itchat.Message):
-    logging.debug(f"received message: {msg}")
+    logging.debug(f"received group chat message: {msg}")
     if msg is None:
         return
 
@@ -50,38 +53,53 @@ def handle_group_chat_message(msg: itchat.Message):
         return
 
     group_chat_name = group_chat.NickName
-    send_user_name = msg.ActualNickName
-    content = msg.Content
+    group_assistant = assistant_mgr.get_group_chat_assistant(group_chat_name, download_dir)
+    group_assistant.handle_message(msg)
 
-    message_type = msg.Type
-    if message_type == "Text":
-        logging.info(f"{send_user_name} says in {group_chat_name}: {content}")
+
+@itchat.msg_register([TEXT])
+def handle_text_message(msg: itchat.Message):
+    logging.debug(f"received single chat message: {msg}")
+    if msg is None:
+        return
+    nickName = msg.user.NickName
+    text: str = msg.text
+    logging.info(f"received message from: {nickName}: {text}")
+
+    if nickName != "mjshi":
         return
 
-    # handle image and video
-    logging.info(f"{send_user_name} sends a {message_type} in {group_chat_name}")
+    # special handling status
+    if "状态" in text:
+        results = []
 
-    group_dir = os.path.join(download_dir, group_chat_name)
-    if not os.path.exists(group_dir):
-        os.makedirs(group_dir)
-    file_path = os.path.join(group_dir, msg.fileName)
-    unique_path = get_unique_filename(file_path)
+        secs = time.time() - start_time
+        results.append(f"服务状态：已运行 {seconds_to_human_readable(secs)}")
 
-    t0 = time.time()
-    msg.download(unique_path)
-    logging.info(f"saved to {unique_path}, cost:{time.time() - t0}s")
+        group_chat_status = assistant_mgr.get_status()
+        if not group_chat_status:
+            results.append("群相册状态：暂未保存任何群的照片")
+        else:
+            results.append("群相册状态：")
+            for s in group_chat_status:
+                results.append(f"- {s}")
+        return "\n".join(results)
 
 
-def get_unique_filename(filename):
-    base_name, extension = os.path.splitext(filename)
-    counter = 1
-    new_filename = filename
+def seconds_to_human_readable(seconds):
+    days = int(seconds // (3600 * 24))
+    hours = int((seconds // 3600) % 24)
+    minutes = int((seconds % 3600) // 60)
+    remaining_seconds = int(seconds % 60)
 
-    while os.path.exists(new_filename):
-        new_filename = f"{base_name}-{counter:02}{extension}"
-        counter += 1
-
-    return new_filename
+    if days > 0:
+        return f"{days}天{hours}小时{minutes}分钟{remaining_seconds}秒"
+    elif hours > 0:
+        return f"{hours}小时{minutes}分钟{remaining_seconds}秒"
+    elif minutes > 0:
+        return f"{minutes}分钟{remaining_seconds}秒"
+    else:
+        return f"{remaining_seconds}秒"
 
 
 # main function
