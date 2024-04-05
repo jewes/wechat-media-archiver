@@ -78,7 +78,7 @@ def get_unique_filename(filename):
     new_filename = filename
 
     while os.path.exists(new_filename):
-        new_filename = f"{base_name}-{counter}{extension}"
+        new_filename = f"{base_name}-{counter:02}{extension}"
         counter += 1
 
     return new_filename
