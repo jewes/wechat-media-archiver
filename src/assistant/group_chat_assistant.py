@@ -103,6 +103,8 @@ class AssistantManager(object):
         self.objects = dict()
         self.lock = threading.Lock()
         for entry in os.listdir(self.download_dir):
+            if entry.startswith("@") or entry.startswith("."):
+                continue
             if os.path.isdir(os.path.join(self.download_dir, entry)):
                 self.get_group_chat_assistant(entry, self.download_dir)
                 logging.info(f"init {entry}")
