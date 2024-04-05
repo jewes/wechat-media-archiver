@@ -65,10 +65,23 @@ def handle_group_chat_message(msg: itchat.Message):
     if not os.path.exists(group_dir):
         os.makedirs(group_dir)
     file_path = os.path.join(group_dir, msg.fileName)
-    if not os.path.exists(file_path):
-        t0 = time.time()
-        msg.download(file_path)
-        logging.info(f"saved to {file_path}, cost:{time.time() - t0}s")
+    unique_path = get_unique_filename(file_path)
+
+    t0 = time.time()
+    msg.download(unique_path)
+    logging.info(f"saved to {unique_path}, cost:{time.time() - t0}s")
+
+
+def get_unique_filename(filename):
+    base_name, extension = os.path.splitext(filename)
+    counter = 1
+    new_filename = filename
+
+    while os.path.exists(new_filename):
+        new_filename = f"{base_name}-{counter}{extension}"
+        counter += 1
+
+    return new_filename
 
 
 # main function
