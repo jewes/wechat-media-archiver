@@ -14,6 +14,8 @@ print(f"Using config file: {config_file_path}")
 config = configparser.ConfigParser()
 config.read(config_file_path, encoding='utf-8')
 
+admin_nickname = config.get("default", "admin_nickname", fallback=None)
+
 # init critical directories
 download_dir = config.get("default", "download_dir", fallback="downloads")
 log_dir = config.get("default", "log_dir", fallback="logs")
@@ -62,11 +64,13 @@ def handle_text_message(msg: itchat.Message):
     logging.debug(f"received single chat message: {msg}")
     if msg is None:
         return
+
     nickName = msg.user.NickName
     text: str = msg.text
     logging.info(f"received message from: {nickName}: {text}")
 
-    if nickName != "mjshi":
+    # only allow admin to get the status
+    if admin_nickname is None or nickName != admin_nickname:
         return
 
     # special handling status
