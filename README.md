@@ -10,7 +10,7 @@
 安装相关依赖，MacOS和Linux均可，Windows未验证
 
 ```shell
-pip instal -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ### 本机验证
